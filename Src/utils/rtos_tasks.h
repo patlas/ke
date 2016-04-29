@@ -6,7 +6,6 @@
 #include "task.h"
 #include "semphr.h"
 #include "queue.h"
-#include "utils.h"
 
 #define PRIORITY_BASIC 1
 #define PRIORITY_MAX configMAX_PRIORITIES

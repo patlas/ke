@@ -35,6 +35,7 @@ void vApplicationMallocFailedHook( void )
 
 void tBlink_led(void * pvParameters)
 {	
+	printf("START BLINK");
 	for(;;)
 	{
 		// nie dodano konfiguracji giop (nie bd migac) ale task bd dzialal
