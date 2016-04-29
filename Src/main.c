@@ -11,7 +11,7 @@
 #include "hw_config.h"
 #include "GLCD.h"
 
-extern uint8_t  ESD_IMG[];
+extern uint8_t ESD_IMG[];
 extern uint8_t ESD_IMG_WIDTH;
 extern uint8_t ESD_IMG_HEIGHT;
 int main(void)
@@ -23,8 +23,8 @@ int main(void)
 	/****************** LCD TEST **********************************/
 	GLCD_Init();
 	GLCD_Clear(White);
-	GLCD_SetTextColor(Black);
-	GLCD_DisplayString(3,  9, "TEST");
+	GLCD_SetTextColor(Blue);
+	GLCD_DisplayString(1,  2, "PRESS WAKEUP BTN");
 	//GLCD_Bmp (0, 0, ESD_IMG_WIDTH, ESD_IMG_HEIGHT, ESD_IMG);
 	/**************************************************************/
 	

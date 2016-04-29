@@ -434,6 +434,18 @@
         </Group>
         <Group>
           <GroupName>drivers</GroupName>
+          <Files>
+            <File>
+              <FileName>rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\drivers\rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>GLCD_SPI_STM32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\drivers\GLCD_SPI_STM32.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>utils</GroupName>
@@ -449,19 +461,19 @@
               <FilePath>.\Src\utils\hard_fault.c</FilePath>
             </File>
             <File>
-              <FileName>rtc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\utils\rtc.c</FilePath>
-            </File>
-            <File>
               <FileName>rtos_tasks.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Src\utils\rtos_tasks.c</FilePath>
             </File>
             <File>
-              <FileName>utils.c</FileName>
+              <FileName>hw_config.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Src\utils\utils.c</FilePath>
+              <FilePath>.\Src\utils\hw_config.c</FilePath>
+            </File>
+            <File>
+              <FileName>esd_logo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Src\utils\esd_logo.c</FilePath>
             </File>
           </Files>
         </Group>
