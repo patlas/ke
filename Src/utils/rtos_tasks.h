@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "stm32f1xx_hal.h"
 
 #include "FreeRTOS.h"

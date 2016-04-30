@@ -470,11 +470,6 @@
               <FileType>1</FileType>
               <FilePath>.\Src\utils\hw_config.c</FilePath>
             </File>
-            <File>
-              <FileName>esd_logo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Src\utils\esd_logo.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

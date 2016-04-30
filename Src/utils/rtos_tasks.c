@@ -35,39 +35,98 @@ void vApplicationMallocFailedHook( void )
 	for(;;);
 }
 
-#define MENU_SIZE 3
+#define MENU_SIZE 2
+#define SELECT_SIGN '+'
+
+static inline void black_screen(void)
+{
+	GLCD_Clear(Black);
+}
+
+static inline void white_screen(void)
+{
+	GLCD_Clear(White);
+}
+
+static void (*f_ptr[])(void) = {
+	black_screen,
+	white_screen
+	//in case of sound generating start task that generate sound and do not block menu task (the same priority)
+};
+
+static void show_menu(void)
+{
+	GLCD_Clear(White);
+	GLCD_SetTextColor(Blue);
+	GLCD_DisplayString(0,  1, "Menu:");
+	GLCD_DisplayString(1,  2, "BLACK SCREEN");
+	GLCD_DisplayString(2,  2, "WHITE SCREEN");
+	GLCD_DisplayString(3,  2, "GENERATE SOUND");
+	GLCD_DisplayString(4,  2, "ADC GRAPH");
+
+}
+
 void tMain_menu(void * pvParameters)
 {
 /* Joystick input                                                         */
   uint8_t joy = 0;
 	int8_t position = 0;
+	bool entered = false;
 	
 	for(;;)
 	{
-    if (!(GPIOD->IDR & (1 << 15))) joy |= (1 << 0);  /* Joystick left            */
-    if (!(GPIOD->IDR & (1 << 13))) joy |= (1 << 1);  /* Joystick right           */
-    if (!(GPIOD->IDR & (1 << 12))) joy |= (1 << 2);  /* Joystick up              */
-    if (!(GPIOD->IDR & (1 << 14))) joy |= (1 << 3);  /* Joystick down            */
-    if (!(GPIOD->IDR & (1 << 11))) joy |= (1 << 4);  /* Joystick select          */
+    if (!(GPIOD->IDR & (1 << 15))) joy = 1;  /* Joystick left            */
+    if (!(GPIOD->IDR & (1 << 13))) joy = 2;  /* Joystick right           */
+    if (!(GPIOD->IDR & (1 << 12))) joy = 4;  /* Joystick up              */
+    if (!(GPIOD->IDR & (1 << 14))) joy = 8;  /* Joystick down            */
+    if (!(GPIOD->IDR & (1 << 11))) joy = 16;  /* Joystick select          */
     
-		if(joy & (1<<2))
+		switch(joy)
 		{
-			GLCD_DisplayChar(position, 1, ' ');
-			position++;
+			
+			case 4:
+				if(entered != true)
+				{
+					GLCD_DisplayChar(position+1, 1, ' ');
+					position++;
+				}
+				break;
+			
+			case 8:
+				if(entered != true)
+				{	
+					GLCD_DisplayChar(position+1, 1, ' ');
+					position--;
+				}
+				break;
+			
+			case 16:
+				entered = !entered;
+				if(entered)
+				{
+					//function pointer array
+					(*f_ptr[position])();
+				}
+				else
+				{
+					show_menu();
+				}
 		}
-		else if(joy & (1<<3))
-		{
-			GLCD_DisplayChar(position, 1, ' ');
-			position--;
-		}
+		
+		
+		
 		
 		if(position > MENU_SIZE)
 			position = 0;
 		if(position < 0)
 			position = MENU_SIZE;
 		
-		GLCD_DisplayChar(position, 1, '+');
-		joy = 0;
+		if(joy)
+		{
+			GLCD_DisplayChar(position, 1, SELECT_SIGN);
+			joy = 0;
+		}
+		
 		
 		
 		
