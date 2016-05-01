@@ -18,4 +18,5 @@ void RtosDataAndTaskInit(void);
 
 void tBlink_led(void * pvParameters); //uint8_t nr, uint16_t delay_ms)
 void tMain_menu(void * pvParameters);
-
+void tADC_graph(void * pvParameters);
+void tSound_generator(void * pvParameters);
