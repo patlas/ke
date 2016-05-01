@@ -43,20 +43,20 @@ void vApplicationMallocFailedHook( void )
 #define MENU_SIZE 2
 #define SELECT_SIGN '+'
 
-static inline void black_screen(void)
+static inline void black_screen(bool on)
 {
 	GLCD_Clear(Black);
 }
 
-static inline void white_screen(void)
+static inline void white_screen(bool on)
 {
 	GLCD_Clear(White);
 }
 
-static void show_menu(uint8_t argv)
+static void show_menu(bool on)
 {
 	/*const*/ uint8_t sound_str[] = "GENERATE SOUND";
-	/*1const*/ uint8_t on_off[][3] = {"ON", "OFF"};
+	/*1const*/ uint8_t on_off[][3] = {"OFF", "ON"};
 	
 	GLCD_Clear(White);
 	GLCD_SetTextColor(Blue);
@@ -64,20 +64,25 @@ static void show_menu(uint8_t argv)
 	GLCD_DisplayString(1,  2, "BLACK SCREEN");
 	GLCD_DisplayString(2,  2, "WHITE SCREEN");
 	GLCD_DisplayString(3,  2, sound_str);
-	GLCD_DisplayString(3,  2+sizeof(sound_str)+1, on_off[argv]); //TODO - check if works properly
+	GLCD_DisplayString(3,  2+sizeof(sound_str)+1, on_off[(int)on]); //TODO - check if works properly
 	GLCD_DisplayString(4,  2, "ADC GRAPH");
 
 }
 
-static inline void _show_menu(void)
+static inline void show_adc_graph(bool on)
 {
-	show_menu(1);
+	//start adc task
+	if(on)
+		vTaskResume(tADC_handle);
+	else
+		vTaskSuspend(tADC_handle);
 }
 
-static void (*f_ptr[])(void) = {
+static void (*f_ptr[])(bool) = {
 	black_screen,
 	white_screen,
-	_show_menu
+	show_menu,
+	show_adc_graph
 	//in case of sound generating start task that generate sound and do not block menu task (the same priority)
 };
 
@@ -118,16 +123,10 @@ void tMain_menu(void * pvParameters)
 			
 			case 16:
 				entered = !entered;
-				if(entered)
-				{
-					//function pointer array
-					(*f_ptr[position])();
-				}
-				else
-				{
-					show_menu(0);
-				}
-		}
+
+				(*f_ptr[position])(entered);
+					
+			}
 		
 		
 		
