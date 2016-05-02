@@ -13,10 +13,14 @@ static void gpio_init(void)
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 	
 	GPIO_InitStruct.Pin = GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Speed = GPIO_SPEED_LOW;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct); //gpioe
+	
+  /* EXTI interrupt init*/
+	NVIC_SetPriority(EXTI15_10_IRQn, 5);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
 /** System Clock Configuration

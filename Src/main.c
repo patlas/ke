@@ -24,7 +24,7 @@ int main(void)
 	GLCD_Init();
 	GLCD_Clear(White);
 	GLCD_SetTextColor(Blue);
-	GLCD_DisplayString(1,  2, "PRESS WAKEUP BTN");
+	GLCD_DisplayString(1,  2, "RTOS ERROR!");
 	//GLCD_Bmp (0, 0, ESD_IMG_WIDTH, ESD_IMG_HEIGHT, ESD_IMG);
 	/**************************************************************/
 	

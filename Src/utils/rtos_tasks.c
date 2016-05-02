@@ -6,7 +6,7 @@
 
 	
 /* globals and queues */
-
+QueueHandle_t joyPressQueue;
 
 /* RTOS data initializer and creator */
 static TaskHandle_t  tBlink_handle;
@@ -16,7 +16,12 @@ static TaskHandle_t	 tADC_handle;
 static TaskHandle_t  tSOUND_handle;
 void RtosDataAndTaskInit(void)
 {
-
+	joyPressQueue = xQueueCreate(10 , 1);
+	
+	/* insert into queue value adequate to show menu at startup */
+	uint8_t enter_menu = 16;
+	xQueueSend( joyPressQueue, &enter_menu, NULL );
+	
 	xTaskCreate( tBlink_led, "BlinkTest", configMINIMAL_STACK_SIZE, NULL, 1, tBlink_handle );
 	//xTaskCreate( tLCD, "LCD", configMINIMAL_STACK_SIZE, NULL, 1, tLCD_handle );
 	xTaskCreate( tMain_menu, "MainMenuTask", configMINIMAL_STACK_SIZE, NULL, 1, tMain_handle );
@@ -40,48 +45,72 @@ void vApplicationMallocFailedHook( void )
 	for(;;);
 }
 
-#define MENU_SIZE 2
+#define MENU_SIZE 4
 #define SELECT_SIGN '+'
+#define MENU_OFFSET 1
 
-static inline void black_screen(bool on)
+static inline void black_screen(bool *on)
 {
 	GLCD_Clear(Black);
 }
 
-static inline void white_screen(bool on)
+static inline void white_screen(bool *on)
 {
 	GLCD_Clear(White);
 }
 
-static void show_menu(bool on)
+static void sound_notify(uint8_t line, uint8_t str_size, bool *on)
 {
-	/*const*/ uint8_t sound_str[] = "GENERATE SOUND";
-	/*1const*/ uint8_t on_off[][3] = {"OFF", "ON"};
-	
+	/*1const*/ uint8_t on_off[][3] = {"OFF", "ON "};
+	GLCD_DisplayString(line, 2+str_size, on_off[(int)*on]); //TODO - check if works properly
+}
+
+static uint8_t sound_str[] = "GENERATE SOUND";
+static bool sound_notification = false;
+static void show_menu(bool *on)
+{
+
 	GLCD_Clear(White);
-	GLCD_SetTextColor(Blue);
-	GLCD_DisplayString(0,  1, "Menu:");
-	GLCD_DisplayString(1,  2, "BLACK SCREEN");
-	GLCD_DisplayString(2,  2, "WHITE SCREEN");
-	GLCD_DisplayString(3,  2, sound_str);
-	GLCD_DisplayString(3,  2+sizeof(sound_str)+1, on_off[(int)on]); //TODO - check if works properly
-	GLCD_DisplayString(4,  2, "ADC GRAPH");
+	GLCD_SetTextColor(Magenta);
+	GLCD_DisplayString(MENU_OFFSET + 0,  1, "MENU:");
+	GLCD_SetTextColor(DarkCyan);
+	GLCD_DisplayString(MENU_OFFSET + 1,  2, "BLACK SCREEN");
+	GLCD_DisplayString(MENU_OFFSET + 2,  2, "WHITE SCREEN");
+	GLCD_DisplayString(MENU_OFFSET + 3,  2, sound_str);
+	sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification); //TODO - check if works properly
+	GLCD_DisplayString(MENU_OFFSET + 4,  2, "ADC GRAPH");
+	//*on = !(*on);
 
 }
 
-static inline void show_adc_graph(bool on)
+static inline void show_adc_graph(bool *on)
 {
 	//start adc task
 	if(on)
-		vTaskResume(tADC_handle);
+	{
+		GLCD_Clear(Red);
+		GLCD_SetTextColor(Black);
+		GLCD_DisplayString(4,  0, "START ADC GRAPH TASK");
+		//vTaskResume(tADC_handle);
+	}
 	else
-		vTaskSuspend(tADC_handle);
+	{
+		//vTaskSuspend(tADC_handle);
+	}
 }
 
-static void (*f_ptr[])(bool) = {
+static inline void generate_sound(bool *on)
+{
+	*on = !(*on); //do not enter menu, only change viewed notify
+	sound_notification = !sound_notification;
+	sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification);
+}
+
+static void (*f_ptr[])(bool*) = {
+	show_menu,
 	black_screen,
 	white_screen,
-	show_menu,
+	generate_sound,
 	show_adc_graph
 	//in case of sound generating start task that generate sound and do not block menu task (the same priority)
 };
@@ -90,25 +119,21 @@ static void (*f_ptr[])(bool) = {
 void tMain_menu(void * pvParameters)
 {
 /* Joystick input                                                         */
-  uint8_t joy = 0;
+  uint8_t joy = 16;
 	int8_t position = 0;
-	bool entered = false;
+	bool entered = true;
 	
 	for(;;)
 	{
-    if (!(GPIOD->IDR & (1 << 15))) joy = 1;  /* Joystick left            */
-    if (!(GPIOD->IDR & (1 << 13))) joy = 2;  /* Joystick right           */
-    if (!(GPIOD->IDR & (1 << 12))) joy = 4;  /* Joystick up              */
-    if (!(GPIOD->IDR & (1 << 14))) joy = 8;  /* Joystick down            */
-    if (!(GPIOD->IDR & (1 << 11))) joy = 16;  /* Joystick select          */
-    
+		
+    xQueueReceive( joyPressQueue, &joy, portMAX_DELAY );
 		switch(joy)
 		{
 			
 			case 4:
 				if(entered != true)
 				{
-					GLCD_DisplayChar(position+1, 1, ' ');
+					GLCD_DisplayChar(MENU_OFFSET+position, 1, ' ');
 					position++;
 				}
 				break;
@@ -116,33 +141,33 @@ void tMain_menu(void * pvParameters)
 			case 8:
 				if(entered != true)
 				{	
-					GLCD_DisplayChar(position+1, 1, ' ');
+					GLCD_DisplayChar(MENU_OFFSET+position, 1, ' ');
 					position--;
 				}
 				break;
 			
 			case 16:
 				entered = !entered;
+				if(entered == false)
+					position = 0;
 
-				(*f_ptr[position])(entered);
+				(*f_ptr[position])(&entered);
 					
 			}
 		
 		
-		
-		
 		if(position > MENU_SIZE)
-			position = 0;
-		if(position < 0)
+			position = 1;
+		if(position < 1)
 			position = MENU_SIZE;
 		
-		if(joy)
+		if(joy && !entered)
 		{
-			GLCD_DisplayChar(position, 1, SELECT_SIGN);
+			GLCD_SetTextColor(DarkGreen);
+			GLCD_DisplayChar(MENU_OFFSET+position, 1, SELECT_SIGN);
 			joy = 0;
 		}
 		
-		vTaskDelay(200);
 	}
 }
 
