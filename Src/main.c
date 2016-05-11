@@ -10,6 +10,7 @@
 #include "rtos_tasks.h"
 #include "hw_config.h"
 #include "GLCD.h"
+#include "led.h"
 
 extern uint8_t ESD_IMG[];
 extern uint8_t ESD_IMG_WIDTH;
@@ -27,7 +28,7 @@ int main(void)
 	GLCD_DisplayString(1,  2, "RTOS ERROR!");
 	//GLCD_Bmp (0, 0, ESD_IMG_WIDTH, ESD_IMG_HEIGHT, ESD_IMG);
 	/**************************************************************/
-	
+	Leds_main();
 	
 	/* set priority grouping - required by FreeRTOS */
 	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);

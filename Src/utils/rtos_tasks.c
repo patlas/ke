@@ -3,7 +3,7 @@
 
 /* data structs and semaphores */
 
-
+void tCouter_task(void * pvParameters);
 	
 /* globals and queues */
 QueueHandle_t joyPressQueue;
@@ -14,6 +14,8 @@ static TaskHandle_t	 tLCD_handle;
 static TaskHandle_t  tMain_handle;
 static TaskHandle_t	 tADC_handle;
 static TaskHandle_t  tSOUND_handle;
+static TaskHandle_t	 tLED_handler;
+static TaskHandle_t	 tCounter_handler;
 void RtosDataAndTaskInit(void)
 {
 	joyPressQueue = xQueueCreate(10 , 1);
@@ -27,6 +29,8 @@ void RtosDataAndTaskInit(void)
 	xTaskCreate( tMain_menu, "MainMenuTask", configMINIMAL_STACK_SIZE, NULL, 1, tMain_handle );
 	xTaskCreate( tADC_graph, "ADCgraphTask", configMINIMAL_STACK_SIZE, NULL, 1, tADC_handle );
 	xTaskCreate( tSound_generator, "SoundTask", configMINIMAL_STACK_SIZE, NULL, 1, tSOUND_handle );
+	xTaskCreate( tLED_counter, "LedTask", configMINIMAL_STACK_SIZE, NULL, 1, tLED_handler );
+	xTaskCreate( tCouter_task, "CounterTask", configMINIMAL_STACK_SIZE, NULL, 1, tCounter_handler );
 
 }
 
@@ -185,6 +189,55 @@ void tBlink_led(void * pvParameters)
 		vTaskDelay(1000);
 	}
 }
+
+uint8_t dig1=0, dig2=0, dig3=0, dig4=0;
+void tLED_counter(void * pvParameters)
+{	
+	printf("START LED counter");
+	uint8_t disp_nr = 0;
+	for(;;)
+	{
+		
+		LED_CHIP_SEL(disp_nr);
+	  SEVEN_LED_DISPLAY(dig4);
+		vTaskDelay(2);
+		LED_CHIP_SEL(disp_nr+1);
+	  SEVEN_LED_DISPLAY(dig3);
+		vTaskDelay(2);
+		LED_CHIP_SEL(disp_nr+2);
+	  SEVEN_LED_DISPLAY(dig2);
+		vTaskDelay(2);
+		LED_CHIP_SEL(disp_nr+3);
+	  SEVEN_LED_DISPLAY(dig1);
+		vTaskDelay(2);
+	}
+}
+
+void tCouter_task(void * pvParameters)
+{	
+	printf("START Counter");
+
+	for(;;)
+	{
+		if(++dig1 > 9)
+		{
+			dig1 = 0;
+			if(++dig2 > 9)
+			{
+				dig2 = 0;
+				if(++dig3 > 9)
+				{
+					dig3 = 0;
+					if(++dig4 > 9)
+						dig4 = 0;
+				}
+			}
+		}
+				
+		vTaskDelay(300);
+	}
+}
+
 
 void tLCD(void * pvParameters)
 {	
