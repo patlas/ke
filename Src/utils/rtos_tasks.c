@@ -1,4 +1,5 @@
 #include "rtos_tasks.h"
+#include "Adc.h"
 
 
 /* data structs and semaphores */
@@ -28,6 +29,7 @@ void RtosDataAndTaskInit(void)
 	//xTaskCreate( tLCD, "LCD", configMINIMAL_STACK_SIZE, NULL, 1, tLCD_handle );
 	xTaskCreate( tMain_menu, "MainMenuTask", configMINIMAL_STACK_SIZE, NULL, 1, tMain_handle );
 	xTaskCreate( tADC_graph, "ADCgraphTask", configMINIMAL_STACK_SIZE, NULL, 1, tADC_handle );
+	vTaskSuspend(tADC_handle);
 	xTaskCreate( tSound_generator, "SoundTask", configMINIMAL_STACK_SIZE, NULL, 1, tSOUND_handle );
 	xTaskCreate( tLED_counter, "LedTask", configMINIMAL_STACK_SIZE, NULL, 1, tLED_handler );
 	xTaskCreate( tCouter_task, "CounterTask", configMINIMAL_STACK_SIZE, NULL, 1, tCounter_handler );
@@ -95,11 +97,11 @@ static inline void show_adc_graph(bool *on)
 		GLCD_Clear(Red);
 		GLCD_SetTextColor(Black);
 		GLCD_DisplayString(4,  0, "START ADC GRAPH TASK");
-		//vTaskResume(tADC_handle);
+		vTaskResume(tADC_handle);
 	}
 	else
 	{
-		//vTaskSuspend(tADC_handle);
+		vTaskSuspend(tADC_handle);
 	}
 }
 
@@ -254,9 +256,23 @@ void tLCD(void * pvParameters)
 void tADC_graph(void * pvParameters)
 {	
 	uint32_t disp_mode = 0;
-	
+	uint32_t g_ADCValue;
+	GLCD_Clear(Green);
+	GLCD_SetTextColor(Black);
+	GLCD_DisplayString(4,  0, "ADC GRAPH TASK");
 	for(;;)
 	{
+//		HAL_ADC_Start(&g_AdcHandle);
+//    for (;;)
+//    {
+//        if (HAL_ADC_PollForConversion(&g_AdcHandle, 1) == HAL_OK)
+//        {
+//            g_ADCValue = HAL_ADC_GetValue(&g_AdcHandle);
+//            //g_MeasurementNumber++;
+//        }
+//				vTaskDelay(200);
+//    }
+		
 		/* wait until task will be notified by e.g. buttone press */
 		xTaskNotifyWait( 0x00, 0xffffffff, &disp_mode, portMAX_DELAY );
 	}
