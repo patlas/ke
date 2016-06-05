@@ -524,18 +524,18 @@ void GLCD_Bargraph (unsigned int x, unsigned int y, unsigned int w, unsigned int
 
   x = WIDTH-x-w;
   wr_reg(0x50, y);                      /* Horizontal GRAM Start Address      */
-  wr_reg(0x51, y+CHAR_H-1);             /* Horizontal GRAM End   Address (-1) */
+  wr_reg(0x51, y+h-1);             /* Horizontal GRAM End   Address (-1) */
   wr_reg(0x52, x);                      /* Vertical   GRAM Start Address      */
   wr_reg(0x53, x+w-1);                  /* Vertical   GRAM End   Address (-1) */
 
-  val = (val * w) >> 10;                /* Scale value for 24x12 characters   */
+  val = h - ((val * h) >> 10);                /* Scale value for 24x12 characters   */
   wr_reg(0x20, y);
   wr_reg(0x21, x);
   wr_cmd(0x22);
   wr_dat_start();
   for (i = 0; i < h; i++) {
     for (j = w-1; j >= 0; j--) {
-      if(j >= val) {
+      if(i < val) {
         wr_dat_only(BackColor);
       } else {
         wr_dat_only(TextColor);

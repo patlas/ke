@@ -94,9 +94,6 @@ static inline void show_adc_graph(bool *on)
 	//start adc task
 	if(on)
 	{
-		GLCD_Clear(Red);
-		GLCD_SetTextColor(Black);
-		GLCD_DisplayString(4,  0, "START ADC GRAPH TASK");
 		vTaskResume(tADC_handle);
 	}
 	else
@@ -252,29 +249,43 @@ void tLCD(void * pvParameters)
 	}
 }
 
+uint16_t adcData[320];
+uint16_t samplesStored = 0;
+uint32_t sum = 0;
+uint32_t sumCnt = 0;
 
 void tADC_graph(void * pvParameters)
 {	
 	uint32_t disp_mode = 0;
-	uint32_t g_ADCValue;
-	GLCD_Clear(Green);
-	GLCD_SetTextColor(Black);
-	GLCD_DisplayString(4,  0, "ADC GRAPH TASK");
+	uint32_t i;
+	taskENTER_CRITICAL();
+	GLCD_Clear(White);
+	taskEXIT_CRITICAL();
+	Adc_registerTask(&tADC_handle);
+	ADC_start();
 	for(;;)
 	{
-//		HAL_ADC_Start(&g_AdcHandle);
-//    for (;;)
-//    {
-//        if (HAL_ADC_PollForConversion(&g_AdcHandle, 1) == HAL_OK)
-//        {
-//            g_ADCValue = HAL_ADC_GetValue(&g_AdcHandle);
-//            //g_MeasurementNumber++;
-//        }
-//				vTaskDelay(200);
-//    }
-		
-		/* wait until task will be notified by e.g. buttone press */
 		xTaskNotifyWait( 0x00, 0xffffffff, &disp_mode, portMAX_DELAY );
+		if(sumCnt < 16384){
+			sum += Adc_getValue();
+			sumCnt++;
+		}else{
+			sumCnt = 0;
+			if(samplesStored < 320){
+				samplesStored++;
+			}else{
+				for(i = 0; i < (samplesStored-1); i++){
+					adcData[i] = adcData[i+1];
+				}
+			}
+			adcData[samplesStored-1] = sum/16384;
+			sum = 0;
+			for(i = 0; i < samplesStored; i++){
+				taskENTER_CRITICAL();
+				GLCD_Bargraph(i,0,1,240,adcData[i]*1024/4038);
+				taskEXIT_CRITICAL();
+			}
+		}
 	}
 }
 

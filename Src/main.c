@@ -16,6 +16,13 @@
 extern uint8_t ESD_IMG[];
 extern uint8_t ESD_IMG_WIDTH;
 extern uint8_t ESD_IMG_HEIGHT;
+
+void vApplicationTickHook( void ){
+	HAL_IncTick();
+}
+
+
+
 int main(void)
 {
 
@@ -31,9 +38,10 @@ int main(void)
 	/**************************************************************/
 	Leds_main();
 	Adc_init();
-	
+		
 	/* set priority grouping - required by FreeRTOS */
 	HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+		
 	/* init created tasks */
 	RtosDataAndTaskInit();
 	/* start scheduler */
