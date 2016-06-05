@@ -25,14 +25,14 @@ void RtosDataAndTaskInit(void)
 	uint8_t enter_menu = 16;
 	xQueueSend( joyPressQueue, &enter_menu, NULL );
 	
-	xTaskCreate( tBlink_led, "BlinkTest", configMINIMAL_STACK_SIZE, NULL, 1, tBlink_handle );
+	xTaskCreate( tBlink_led, "BlinkTest", configMINIMAL_STACK_SIZE, NULL, 1, &tBlink_handle );
 	//xTaskCreate( tLCD, "LCD", configMINIMAL_STACK_SIZE, NULL, 1, tLCD_handle );
-	xTaskCreate( tMain_menu, "MainMenuTask", configMINIMAL_STACK_SIZE, NULL, 1, tMain_handle );
-	xTaskCreate( tADC_graph, "ADCgraphTask", configMINIMAL_STACK_SIZE, NULL, 1, tADC_handle );
+	xTaskCreate( tMain_menu, "MainMenuTask", configMINIMAL_STACK_SIZE, NULL, 1, &tMain_handle );
+	xTaskCreate( tADC_graph, "ADCgraphTask", configMINIMAL_STACK_SIZE, NULL, 1, &tADC_handle );
 	vTaskSuspend(tADC_handle);
-	xTaskCreate( tSound_generator, "SoundTask", configMINIMAL_STACK_SIZE, NULL, 1, tSOUND_handle );
-	xTaskCreate( tLED_counter, "LedTask", configMINIMAL_STACK_SIZE, NULL, 1, tLED_handler );
-	xTaskCreate( tCouter_task, "CounterTask", configMINIMAL_STACK_SIZE, NULL, 1, tCounter_handler );
+	xTaskCreate( tSound_generator, "SoundTask", configMINIMAL_STACK_SIZE, NULL, 1, &tSOUND_handle );
+	xTaskCreate( tLED_counter, "LedTask", configMINIMAL_STACK_SIZE, NULL, 1, &tLED_handler );
+	xTaskCreate( tCouter_task, "CounterTask", configMINIMAL_STACK_SIZE, NULL, 1, &tCounter_handler );
 
 }
 
