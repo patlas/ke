@@ -58,12 +58,14 @@ void vApplicationMallocFailedHook( void )
 
 static inline void black_screen(bool *on)
 {
-	GLCD_Clear(Black);
+	if(*on)
+		GLCD_Clear(Black);
 }
 
 static inline void white_screen(bool *on)
 {
-	GLCD_Clear(White);
+	if(*on)
+		GLCD_Clear(White);
 }
 
 static void sound_notify(uint8_t line, uint8_t str_size, bool *on)
@@ -76,7 +78,8 @@ static uint8_t sound_str[] = "GENERATE SOUND";
 static bool sound_notification = false;
 static void show_menu(bool *on)
 {
-
+//if(!(*on))
+//{
 	GLCD_Clear(White);
 	GLCD_SetTextColor(Magenta);
 	GLCD_DisplayString(MENU_OFFSET + 0,  1, "MENU:");
@@ -84,9 +87,11 @@ static void show_menu(bool *on)
 	GLCD_DisplayString(MENU_OFFSET + 1,  2, "BLACK SCREEN");
 	GLCD_DisplayString(MENU_OFFSET + 2,  2, "WHITE SCREEN");
 	GLCD_DisplayString(MENU_OFFSET + 3,  2, sound_str);
-	sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification); //TODO - check if works properly
+	//sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification); //TODO - check if works properly
 	GLCD_DisplayString(MENU_OFFSET + 4,  2, "ADC GRAPH");
 	//*on = !(*on);
+//}
+sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification); //TODO - check if works properly
 
 }
 
@@ -101,7 +106,7 @@ static inline void show_adc_graph(bool *on)
 	else
 	{
 		vTaskSuspend(tADC_handle);
-		show_menu(NULL);
+		//show_menu(NULL);
 	}
 }
 
@@ -110,6 +115,7 @@ static inline void generate_sound(bool *on)
 	*on = !(*on); //do not enter menu, only change viewed notify
 	sound_notification = !sound_notification;
 	sound_notify(MENU_OFFSET + 3, sizeof(sound_str), &sound_notification);
+	//*on = !(*on);
 }
 
 static void (*f_ptr[])(bool*) = {
@@ -154,9 +160,14 @@ void tMain_menu(void * pvParameters)
 			
 			case 16:
 				entered = !entered;
-				(*f_ptr[position])(&entered);
+				//(*f_ptr[position])(&entered);
 				if(entered == false)
+				{
+				  (*f_ptr[position])(&entered);
 					position = 0;
+				}
+				(*f_ptr[position])(&entered);
+				
 					
 			}
 		
