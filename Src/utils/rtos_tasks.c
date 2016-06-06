@@ -1,5 +1,6 @@
 #include "rtos_tasks.h"
 #include "Adc.h"
+#include <inttypes.h>
 
 
 /* data structs and semaphores */
@@ -92,13 +93,15 @@ static void show_menu(bool *on)
 static inline void show_adc_graph(bool *on)
 {
 	//start adc task
-	if(on)
+	if(*on)
 	{
+		GLCD_Clear(White);
 		vTaskResume(tADC_handle);
 	}
 	else
 	{
 		vTaskSuspend(tADC_handle);
+		show_menu(NULL);
 	}
 }
 
@@ -151,10 +154,9 @@ void tMain_menu(void * pvParameters)
 			
 			case 16:
 				entered = !entered;
+				(*f_ptr[position])(&entered);
 				if(entered == false)
 					position = 0;
-
-				(*f_ptr[position])(&entered);
 					
 			}
 		
